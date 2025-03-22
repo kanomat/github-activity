@@ -3,9 +3,9 @@ package net.githubactivity;
 import java.util.ArrayList;
 
 public class UserActivityData {
-    private ArrayList<ActivityData> pushes;
-    private ArrayList<ActivityData> stars;
-    private String user;
+    private final ArrayList<ActivityData> pushes;
+    private final ArrayList<ActivityData> stars;
+    private final String user;
 
     public UserActivityData(String user) {
         this.user = user;
@@ -13,16 +13,19 @@ public class UserActivityData {
         stars = new ArrayList<>();
     }
 
-    public void AddPushData(ActivityData push) {
+    public void addPushData(ActivityData push) {
         pushes.add(push);
     }
 
-    public void AddStarData(ActivityData star) {
+    public void addStarData(ActivityData star) {
         stars.add(star);
     }
 
     @Override
     public String toString() {
+        if (pushes.isEmpty() && stars.isEmpty()) {
+            return "No user activity";
+        }
         StringBuilder sb = new StringBuilder();
         for (var push : pushes) {
             sb.append(user).append(" pushed to ").append(push.repo()).append(" at ").append(push.time()).append("\n");
