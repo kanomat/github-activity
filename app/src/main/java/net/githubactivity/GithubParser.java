@@ -8,6 +8,50 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class GithubParser {
+    private static PushData parsePushData(JsonObject json) {
+        String repo = json.getJsonObject("repo").getString("name");
+        String time = json.getString("created_at");
+
+        return new PushData(repo, time);
+    }
+
+    private static CreateData parseCreateData(JsonObject json) {
+        String repo = json.getJsonObject("repo").getString("name");
+        String time = json.getString("created_at");
+
+        return new CreateData(repo, time);
+    }
+
+    private static StarData parseStarData(JsonObject json) {
+        String repo = json.getJsonObject("repo").getString("name");
+        String time = json.getString("created_at");
+
+        return new StarData(repo, time);
+    }
+
+    private static IssueCommentData parseIssueCommentData(JsonObject json) {
+        String repo = json.getJsonObject("repo").getString("name");
+        String time = json.getString("created_at");
+        int number = json.getJsonObject("payload").getJsonObject("issue").getInt("number");
+
+        return new IssueCommentData(repo, number, time);
+    }
+
+    private static PullRequestData parsePullRequestData(JsonObject json) {
+        String repo = json.getJsonObject("repo").getString("name");
+        String time = json.getString("created_at");
+        String src = json.getJsonObject("payload")
+                .getJsonObject("pull_request")
+                .getJsonObject("head")
+                .getString("label");
+        String dest = json.getJsonObject("payload")
+                .getJsonObject("pull_request")
+                .getJsonObject("base")
+                .getString("label");
+
+        return new PullRequestData(repo, dest, src, time);
+    }
+
     public static UserActivityData parseGithubJson(String jsonString) throws IOException {
         Logger logger = Logger.getLogger("GithubParser");
         FileHandler fileHandler = new FileHandler("app.log");
@@ -17,24 +61,19 @@ public class GithubParser {
         JsonReader reader = Json.createReader(new StringReader(jsonString));
         JsonArray events = reader.readArray();
         if (events.isEmpty())
-            return new UserActivityData("");
+            return null;
         String username = events.getJsonObject(0)
                 .getJsonObject("actor")
                 .getString("login");
 
         var userData = new UserActivityData(username);
         for (var event : events.getValuesAs(JsonObject.class)) {
-            String repo = event.getJsonObject("repo").getString("name");
-            String time = event.getString("created_at");
             switch (event.getString("type")) {
-                case "PushEvent" -> {
-                    var activityData = new ActivityData(repo, time);
-                    userData.addPushData(activityData);
-                }
-                case "WatchEvent" -> {
-                    var activityData = new ActivityData(repo, time);
-                    userData.addStarData(activityData);
-                }
+                case "PushEvent" -> userData.addActivity(parsePushData(event));
+                case "WatchEvent" -> userData.addActivity(parseStarData(event));
+                case "PullRequestEvent" -> userData.addActivity(parsePullRequestData(event));
+                case "IssueCommentEvent" -> userData.addActivity(parseIssueCommentData(event));
+                case "CreateEvent" -> userData.addActivity(parseCreateData(event));
                 default -> logger.warning("Unknown event type: " + event.getString("type"));
             }
         }
