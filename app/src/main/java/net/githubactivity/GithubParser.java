@@ -1,13 +1,13 @@
 package net.githubactivity;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 public class GithubParser {
     private static PushData parsePushData(JsonObject json) {
@@ -55,11 +55,6 @@ public class GithubParser {
     }
 
     public static UserActivityData parseGithubJson(String jsonString) throws IOException {
-        Logger logger = Logger.getLogger("GithubParser");
-        FileHandler fileHandler = new FileHandler("app.log");
-        fileHandler.setFormatter(new SimpleFormatter());
-        logger.addHandler(fileHandler);
-
         JsonReader reader = Json.createReader(new StringReader(jsonString));
         JsonArray events = reader.readArray();
         if (events.isEmpty())
@@ -76,7 +71,7 @@ public class GithubParser {
                 case "PullRequestEvent" -> userData.addActivity(parsePullRequestData(event));
                 case "IssueCommentEvent" -> userData.addActivity(parseIssueCommentData(event));
                 case "CreateEvent" -> userData.addActivity(parseCreateData(event));
-                default -> logger.warning("Unknown event type: " + event.getString("type"));
+                default -> ActivityLogger.logger.warning("Unknown event type: " + event.getString("type"));
             }
         }
         return userData;
