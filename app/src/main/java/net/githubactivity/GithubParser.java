@@ -3,6 +3,8 @@ package net.githubactivity;
 import javax.json.*;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -10,28 +12,28 @@ import java.util.logging.SimpleFormatter;
 public class GithubParser {
     private static PushData parsePushData(JsonObject json) {
         String repo = json.getJsonObject("repo").getString("name");
-        String time = json.getString("created_at");
+        ZonedDateTime time = ZonedDateTime.parse(json.getString("created_at"), DateTimeFormatter.ISO_DATE_TIME);
 
         return new PushData(repo, time);
     }
 
     private static CreateData parseCreateData(JsonObject json) {
         String repo = json.getJsonObject("repo").getString("name");
-        String time = json.getString("created_at");
+        ZonedDateTime time = ZonedDateTime.parse(json.getString("created_at"), DateTimeFormatter.ISO_DATE_TIME);
 
         return new CreateData(repo, time);
     }
 
     private static StarData parseStarData(JsonObject json) {
         String repo = json.getJsonObject("repo").getString("name");
-        String time = json.getString("created_at");
+        ZonedDateTime time = ZonedDateTime.parse(json.getString("created_at"), DateTimeFormatter.ISO_DATE_TIME);
 
         return new StarData(repo, time);
     }
 
     private static IssueCommentData parseIssueCommentData(JsonObject json) {
         String repo = json.getJsonObject("repo").getString("name");
-        String time = json.getString("created_at");
+        ZonedDateTime time = ZonedDateTime.parse(json.getString("created_at"), DateTimeFormatter.ISO_DATE_TIME);
         int number = json.getJsonObject("payload").getJsonObject("issue").getInt("number");
 
         return new IssueCommentData(repo, number, time);
@@ -39,7 +41,7 @@ public class GithubParser {
 
     private static PullRequestData parsePullRequestData(JsonObject json) {
         String repo = json.getJsonObject("repo").getString("name");
-        String time = json.getString("created_at");
+        ZonedDateTime time = ZonedDateTime.parse(json.getString("created_at"), DateTimeFormatter.ISO_DATE_TIME);
         String src = json.getJsonObject("payload")
                 .getJsonObject("pull_request")
                 .getJsonObject("head")

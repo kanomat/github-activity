@@ -28,7 +28,11 @@ public class App {
         try {
             String inJson = response(username);
             UserActivityData data = GithubParser.parseGithubJson(inJson);
-            System.out.println(data);
+            if (data == null) {
+                System.out.println("No activity found");
+            } else {
+                System.out.println(data);
+            }
         } catch (IOException | InterruptedException | IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
